@@ -1,18 +1,33 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
 }
 
 android {
     namespace = "com.mio.plugin.renderer"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.mio.plugin.renderer"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+    }
+    
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
+    }
+    
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+    
+    buildFeatures {
+        resValues = true
     }
 
     buildTypes {
@@ -65,15 +80,8 @@ android {
             manifestPlaceholders["minMCVer"] = ""
             //最大支持的MC版本
             //The maximum supported MC version
-            manifestPlaceholders["maxMCVer"] = ""
+            manifestPlaceholders["maxMCVer"] = "" //为空则不限制 No restriction if empty
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 }
 
