@@ -4,12 +4,14 @@ plugins {
 
 android {
     namespace = "com.mio.plugin.renderer"
-    compileSdk = 36
+    compileSdk = 37
+    compileSdkMinor = 0
+    buildToolsVersion = "37.0.0"
 
     defaultConfig {
         applicationId = "com.mio.plugin.renderer"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
     }
