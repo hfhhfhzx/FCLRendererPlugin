@@ -1,6 +1,20 @@
+import com.android.build.api.dsl.ApplicationBuildType
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
 }
+
+val properties: Properties? = loadPropertiesFromFile("signing.properties")
+    fun getString(propertyName: String, environmentName: String, prompt: String): String =
+        properties?.getProperty(propertyName)
+            ?: System.getenv(environmentName)
+            ?: System.console()?.readLine("\n$prompt: ").orEmpty()
+
+fun loadPropertiesFromFile(fileName: String): Properties? =
+    rootProject.file(fileName).takeIf { it.exists() }?.let { file ->
+        Properties().apply { load(file.inputStream()) }
+    }
 
 android {
     namespace = "com.mio.plugin.renderer"
@@ -22,6 +36,25 @@ android {
         }
     }
     
+    signingConfigs {
+        // 签名配置
+        // 支持：从 signing.properties 中读取；从环境变量中读取；手动输入。优先级由高到低
+        // 如果以上三种都没有，就使用默认 debug签名
+        create("hasProperties") {
+            if (properties != null) {
+                storeFile = file(getString("storeFile", "STORE_FILE", "Store file"))
+                storePassword = getString("storePassword", "STORE_PASSWORD", "Store password")
+                keyAlias = getString("keyAlias", "KEY_ALIAS", "Key alias")
+                keyPassword = getString("keyPassword", "KEY_PASSWORD", "Key password")
+            }
+            // 分别为是否启用 V1, V2, V3, V4 签名
+            enableV1Signing = false
+            enableV2Signing = true
+            enableV3Signing = false
+            enableV4Signing = false
+        }
+    }
+    
     packaging {
         jniLibs {
             useLegacyPackaging = true
@@ -33,11 +66,23 @@ android {
     }
 
     buildTypes {
+        val configSigning: ApplicationBuildType.() -> Unit = {
+            val signingConfigName = if (properties != null) "hasProperties" else "debug"
+            signingConfig = signingConfigs.findByName(signingConfigName)
+        }
+        
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            configSigning()
+            isMinifyEnabled = true // 启用 R8
+            isShrinkResources = true // 启用资源缩减
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+        
+        debug {
+            configSigning()
+            isMinifyEnabled = false
+        }
+        
         configureEach {
             // 应用名
             //app name
