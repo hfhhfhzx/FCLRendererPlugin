@@ -1,0 +1,62 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ "*" ]
+    paths:
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - '.github/workflows/build.yml'
+  pull_request:
+    branches: [ "*" ]
+    paths:
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: false
+      
+      - name: Set up Signing Key
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore
+          echo "storeFile=../keystore" > signing.properties
+          echo "keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}" >> signing.properties
+          echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> signing.properties
+          echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> signing.properties
+          
+      - name: Grant Execute Permission for gradlew
+        run: chmod +x ./gradlew
+      
+      - name: Build with Gradle and Find APK
+        id: build
+        run: |
+          ./gradlew assembleRelease
+          echo "APK=$(find ./app/build/outputs/apk -name "*.apk")" >> $GITHUB_OUTPUT
+      
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          path: ${{ steps.build.outputs.APK }}
+          archive: false

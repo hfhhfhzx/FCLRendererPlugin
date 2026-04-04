@@ -5,6 +5,12 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+// 可选：获取 git commit 计数
+// val gitCommitCount: Int by lazy { runGitCommand("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0 }
+
+// 可选：获取最新的 v* git tag
+// val gitTag: String by lazy { runGitCommand("describe", "--tags", "--match", "v*", "--abbrev=0")?.toIntOrNull() ?: 0 }
+
 val properties: Properties? = loadPropertiesFromFile("signing.properties")
     fun getString(propertyName: String, environmentName: String, prompt: String): String =
         properties?.getProperty(propertyName)
@@ -15,6 +21,16 @@ fun loadPropertiesFromFile(fileName: String): Properties? =
     rootProject.file(fileName).takeIf { it.exists() }?.let { file ->
         Properties().apply { load(file.inputStream()) }
     }
+
+fun runGitCommand(vararg args: String): String? = runCatching {
+    ProcessBuilder(listOf("git") + args)
+        .redirectErrorStream(true)
+        .start()
+        .let { process ->
+            val output = process.inputStream.bufferedReader().readText().trim()
+            if (process.waitFor() == 0 && output.isNotBlank()) output else null
+        }
+}.getOrNull()
 
 android {
     namespace = "com.mio.plugin.renderer"
@@ -79,7 +95,6 @@ android {
         }
         
         debug {
-            configSigning()
             isMinifyEnabled = false
         }
         

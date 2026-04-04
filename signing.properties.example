@@ -1,0 +1,4 @@
+storeFile=../keystore
+keyAlias=CERT
+keyPassword=114514
+storePassword=1919810
