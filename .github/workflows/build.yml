@@ -40,11 +40,13 @@ jobs:
       - name: Set up Signing Key
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore
-          echo "storeFile=../keystore" > signing.properties
-          echo "keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}" >> signing.properties
-          echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> signing.properties
-          echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> signing.properties
+          if [ ! -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore
+            echo "storeFile=../keystore" > signing.properties
+            echo "keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}" >> signing.properties
+            echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> signing.properties
+            echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> signing.properties
+          fi
           
       - name: Grant Execute Permission for gradlew
         run: chmod +x ./gradlew
