@@ -5,11 +5,17 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-// 可选：获取 git commit 计数
-// val gitCommitCount: Int by lazy { runGitCommand("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0 }
+// 获取 git commit 计数
+val gitCommitCount: Int by lazy { runGitCommand("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0 }
 
-// 可选：获取最新的 v* git tag
-// val gitTag: String by lazy { runGitCommand("describe", "--tags", "--match", "v*", "--abbrev=0")?.toIntOrNull() ?: 0 }
+// 最新的以 v 开头的 git tag
+val gitTag: String by lazy { runGitCommand("describe", "--tags", "--match", "v*", "--abbrev=0") ?: "v1.0.0" }
+
+val gitHash: String by lazy { runGitCommand("rev-parse", "--short", "HEAD") ?: "unknown" }
+
+val gitHashLong: String by lazy { runGitCommand("rev-parse", "HEAD") ?: "unknown" }
+
+val gitBranch: String by lazy { runGitCommand("rev-parse", "--abbrev-ref", "HEAD") ?: "unknown" }
 
 val properties: Properties? = loadPropertiesFromFile("signing.properties")
     fun getString(propertyName: String, environmentName: String, prompt: String): String =
@@ -42,8 +48,8 @@ android {
         applicationId = "com.mio.plugin.renderer"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = gitCommitCount
+        versionName = gitTag
     }
     
     kotlin {
