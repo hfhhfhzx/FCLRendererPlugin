@@ -1,0 +1,6 @@
+-keep,allowobfuscation class com.mio.plugin.renderer.** {
+    *;
+}
+
+# 不启用 重新打包到未命名（默认）软件包（AGP 9.1.0+）
+# -dontrepackage

@@ -95,9 +95,13 @@ android {
         
         release {
             configSigning()
-            isMinifyEnabled = true // 启用 R8
-            isShrinkResources = true // 启用资源缩减
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // R8 设置（新 DSL）
+            optimization {
+                enable = true //启用
+                keepRules {
+                    includeDefault = true //启用默认的 proguard-android-optimize.txt。此选项默认启用
+                }
+            }
         }
         
         debug {
