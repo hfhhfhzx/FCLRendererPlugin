@@ -105,7 +105,9 @@ android {
         }
         
         debug {
-            isMinifyEnabled = false
+            optimization {
+                enable = false
+            }
         }
         
         configureEach {
