@@ -6,10 +6,10 @@ plugins {
 }
 
 // 获取 git commit 计数
-val gitCommitCount: Int by lazy { runGitCommand("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0 }
+val gitCommitCount: Int by lazy { runGitCommand("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1 }
 
 // 最新的以 v 开头的 git tag
-val gitTag: String by lazy { runGitCommand("describe", "--tags", "--match", "v*", "--abbrev=0") ?: "v1.0.0" }
+val gitTag: String by lazy { runGitCommand("describe", "--tags", "--match", "v*", "--abbrev=0") ?: "v1.0" }
 
 val gitHash: String by lazy { runGitCommand("rev-parse", "--short", "HEAD") ?: "unknown" }
 
@@ -29,7 +29,9 @@ fun loadPropertiesFromFile(fileName: String): Properties? =
     }
 
 fun runGitCommand(vararg args: String): String? = runCatching {
+    val workingDir = System.getProperty("user.dir")
     ProcessBuilder(listOf("git") + args)
+        .directory(projectDir)
         .redirectErrorStream(true)
         .start()
         .let { process ->
@@ -162,7 +164,4 @@ android {
             manifestPlaceholders["maxMCVer"] = ""
         }
     }
-}
-
-dependencies {
 }

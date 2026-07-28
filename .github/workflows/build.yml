@@ -35,9 +35,16 @@ jobs:
           
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
-        # 可选
-        # with:
-          # cache-read-only: false
+        with:
+          cache-read-only: false
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
       
       - name: Set up Signing Key
         # Pull Request 不配置签名密钥（安全考虑）
