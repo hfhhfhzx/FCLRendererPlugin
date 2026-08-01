@@ -41,7 +41,7 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
       
       - name: Setup JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           distribution: temurin
           java-version: 21
