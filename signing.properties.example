@@ -1,3 +1,4 @@
+# 注意：这里的路径是相对 build.gradle.kts 的路径
 storeFile=../keystore
 keyAlias=CERT
 keyPassword=114514

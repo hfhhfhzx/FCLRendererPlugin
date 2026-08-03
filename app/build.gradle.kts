@@ -5,17 +5,10 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-// 获取 git commit 计数
-val gitCommitCount: Int by lazy { runGitCommand("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1 }
-
-// 最新的以 v 开头的 git tag
-val gitTag: String by lazy { runGitCommand("describe", "--tags", "--match", "v*", "--abbrev=0") ?: "v1.0" }
-
-val gitHash: String by lazy { runGitCommand("rev-parse", "--short", "HEAD") ?: "unknown" }
-
-val gitHashLong: String by lazy { runGitCommand("rev-parse", "HEAD") ?: "unknown" }
-
-val gitBranch: String by lazy { runGitCommand("rev-parse", "--abbrev-ref", "HEAD") ?: "unknown" }
+val appName = rootProject.extra.get("appName") as String
+val gitCommitCount = rootProject.extra["gitCommitCount"] as Int
+val gitTag = rootProject.extra["gitTag"] as String
+val gitHash = rootProject.extra["gitHash"] as String
 
 val properties: Properties? = loadPropertiesFromFile("signing.properties")
     fun getString(propertyName: String, environmentName: String, prompt: String): String =
@@ -28,18 +21,6 @@ fun loadPropertiesFromFile(fileName: String): Properties? =
         Properties().apply { load(file.inputStream()) }
     }
 
-fun runGitCommand(vararg args: String): String? = runCatching {
-    val workingDir = System.getProperty("user.dir")
-    ProcessBuilder(listOf("git") + args)
-        .directory(projectDir)
-        .redirectErrorStream(true)
-        .start()
-        .let { process ->
-            val output = process.inputStream.bufferedReader().readText().trim()
-            if (process.waitFor() == 0 && output.isNotBlank()) output else null
-        }
-}.getOrNull()
-
 android {
     namespace = "com.mio.plugin.renderer"
     compileSdk = 37
@@ -48,22 +29,18 @@ android {
 
     defaultConfig {
         applicationId = "com.mio.plugin.renderer"
-        minSdk = 26
+        minSdk = 28
         targetSdk = 37
         versionCode = gitCommitCount
         versionName = gitTag
-    }
-    
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-        }
+        
+        multiDexEnabled = false
     }
     
     signingConfigs {
         // 签名配置
         // 支持：从 signing.properties 中读取；从环境变量中读取；手动输入。优先级由高到低
-        // 如果以上三种都没有，就使用默认 debug签名
+        // 如果以上三种都没有，就使用默认 debug 签名
         create("hasProperties") {
             if (properties != null) {
                 storeFile = file(getString("storeFile", "STORE_FILE", "Store file"))
@@ -80,9 +57,17 @@ android {
     }
     
     packaging {
+        resources {
+            excludes += "kotlin/**"
+        }
         jniLibs {
             useLegacyPackaging = true
         }
+    }
+    
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     
     buildFeatures {
@@ -115,7 +100,7 @@ android {
         configureEach {
             // 应用名
             //app name
-            resValue("string","app_name","XXX Renderer")
+            resValue("string","app_name","$appName")
             // 包名后缀
             // package name Suffix
             applicationIdSuffix = ".xxx"
@@ -164,4 +149,14 @@ android {
             manifestPlaceholders["maxMCVer"] = ""
         }
     }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    }
+}
+
+base {
+    archivesName = "${appName}-v${gitTag}-${gitCommitCount}-${gitHash}"
 }

@@ -1,21 +1,15 @@
-name: Build APK
+name: Build and Release
 
 on:
   push:
-    branches: [ "*" ]
-    paths:
-      - 'app/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - 'gradle/**'
-      - '.github/workflows/build.yml'
-  workflow_dispatch:
+    tags: [ "v*" ]
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   build:
-    # 只有 手动触发运行 或 commit message 中不包含 [skip ci] 才会运行
-    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     
     steps:
@@ -53,12 +47,42 @@ jobs:
         id: build
         run: |
           chmod +x ./gradlew
+          start_time="$(date +%s)"
           ./gradlew assembleRelease
+          end_time="$(date +%s)"
+
+          duration_seconds=$((end_time - start_time))
+          duration_minutes=$((duration_seconds / 60))
+          duration_remainder=$((duration_seconds % 60))
+          printf -v duration_human "%dm %02ds" "$duration_minutes" "$duration_remainder"
           
           echo "APK=$(find ./app/build/outputs/apk/release -name "*.apk")" >> $GITHUB_OUTPUT
+          echo "build_duration=$duration_human" >> $GITHUB_OUTPUT
       
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v7
+      - name: Generate Release Notes
+        run: |
+          extract() {
+            basename "${{ steps.build.outputs.APK }}" | cut -d'-' -f"$1"
+          }
+          Version=$(extract 2 | sed 's/^v//')
+          VersionCode=$(extract 3)
+          {
+            echo "- **Version:** \`${VERSION_NAME}\`"
+            echo "- **VersionCode:** \`${VERSION_CODE}\`"
+            echo "- **Build time:** \`${{ steps.build.outputs.build_duration }}\`"
+            echo
+            echo "## What's Changed"
+            echo
+            echo "待补充"
+          } > release-note.md
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
         with:
-          path: ${{ steps.build.outputs.APK }}
-          archive: false
+          name: "${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: false
+          files: ${{ steps.build.outputs.APK }}
+          body: release-note.md
+          

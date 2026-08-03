@@ -1,7 +1,7 @@
-name: Build APK
+name: Pull Request
 
 on:
-  push:
+  pull_request:
     branches: [ "*" ]
     paths:
       - 'app/**'
@@ -9,13 +9,10 @@ on:
       - 'settings.gradle.kts'
       - 'gradle.properties'
       - 'gradle/**'
-      - '.github/workflows/build.yml'
-  workflow_dispatch:
+      - '.github/workflows/pr.yml'
 
 jobs:
   build:
-    # 只有 手动触发运行 或 commit message 中不包含 [skip ci] 才会运行
-    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     
     steps:
@@ -37,18 +34,6 @@ jobs:
           distribution: temurin
           java-version: 21
       
-      - name: Set up Signing Key
-        run: |
-          # 只有在 Github Secrets 中配置了 KEYSTORE_BASE64 才配置
-          if [ ! -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            # 请将 keystore 以 base64 的形式储存在 Github Secrets 中
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore
-            echo "storeFile=../keystore" > signing.properties
-            echo "keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}" >> signing.properties
-            echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> signing.properties
-            echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> signing.properties
-          fi
-          
       - name: Build with Gradle
         id: build
         run: |
