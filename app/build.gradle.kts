@@ -98,8 +98,8 @@ android {
         }
         
         configureEach {
-            // 应用名
-            //app name
+            // 应用名（在项目根目录的 build.gradle.kts 中配置）
+            // app name
             resValue("string","app_name","$appName")
             // 包名后缀
             // package name Suffix

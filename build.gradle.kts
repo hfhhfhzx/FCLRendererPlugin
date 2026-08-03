@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android) apply false
 }
 
+// App 名称
 extra.set("appName", "XXX Renderer")
 // 获取 git commit 计数
 extra["gitCommitCount"] = runGitCommand("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1
