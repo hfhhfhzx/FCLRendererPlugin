@@ -24,3 +24,5 @@ fun runGitCommand(vararg args: String): String? = runCatching {
             if (process.waitFor() == 0 && output.isNotBlank()) output else null
         }
 }.getOrNull()
+
+defaultTasks("assembleRelease")
