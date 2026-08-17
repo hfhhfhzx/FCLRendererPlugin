@@ -57,26 +57,46 @@ FCLRendererPlugin 正是这样一个插件项目模板，允许你快速生成�
 
 - 安装 Termux
    - 于 [GitHub](https://github.com/termux/termux-app) 上下载并安装 Termux
+   - 切换源
+     ```bash
+     sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirrors.tuna.tsinghua.edu.cn/termux/termux-packages-24 stable main@' $PREFIX/etc/apt/sources.list && pkg update
+     ```
    - 打开 Termux，安装必要依赖
       ```bash
-      pkg install git openjdk-21 tar wget
+      pkg install git openjdk-21 tar wget -y
       ```
 - 安装 `Android SDK` 和 `Android NDK`
-   - 访问 [android-ndk-custom](https://github.com/HomuHomu833/android-ndk-custom) 和 [android-sdk-custom](https://github.com/HomuHomu833/android-sdk-custom)，在 Release 中复制下载链接
-   - 使用 `mkdir` 创建目录 `android` 并使用 `cd` 进入
-   - 使用 `wget` 把它们下载下来
-   - 使用 `tar -xf *.xz` 解压
-   - 使用 `rm -rf *.xz` 删除残留
-   - 执行 `cd android-sdk/cmdline-tools && mkdir latest && cd latest && (mv ../* . ; cd ../../../..)` 解决无法使用的问题
-   - 执行 `echo "export ANDROID_HOME=$HOME/android" >> .bashrc && echo "export PATH=$ANDROID_HOME/android-sdk/cmdline-tools/latest/bin:$PATH" > .bashrc` 配置 SDK
-   - 重启 Termux
-   - 执行 `yes | sdkmanager --licenses` 接受许可
+   - 参照以下步骤进行安装
+   ```bash
+     mkdir -p android && cd android
+     
+     # 要下载的文件来自 https://github.com/HomuHomu833/android-ndk-custom 和 https://github.com/HomuHomu833/android-sdk-custom
+     
+     wget https://github.com/HomuHomu833/android-ndk-custom/releases/download/r30/android-ndk-r30-beta2-aarch64-linux-android.tar.xz
+     wget https://github.com/HomuHomu833/android-sdk-custom/releases/download/37.0.0/android-sdk-aarch64-linux-android.tar.xz
+     
+     # 解压
+     for f in android-*.tar.xz ; do tar -xf "$f" ; done
+     # 删除残留
+     rm -rf android-*.tar.xz
+     # 将下载的 cmdline-tools 解压内容嵌套进 latest 子目录，以满足路径要求
+     cd android-sdk/cmdline-tools && mkdir latest && cd latest && mv ../* . 2>/dev/null && cd $HOME
+     
+     # 配置
+     echo 'export ANDROID_HOME=$HOME/android' >> ~/.bashrc && echo 'export PATH=$ANDROID_HOME/android-sdk/cmdline-tools/latest/bin:$PATH' >> ~/.bashrc
+     # 请重启 Termux
+     
+     # 接受 Android SDK 的许可
+     yes | sdkmanager --licenses
+   ```
 
 - 按照上一个篇章的步骤进行操作
 
 - 解决 `aapt2` 问题 (只有当你遇到该问题时才这样做)
-   - 执行 `pkg install aapt2` 安装 `aapt2`
-   - 执行 `echo "android.aapt2FromMavenOverride=/data/data/com.termux/files/usr/bin/aapt2" ~/.gradle/gradle.properties` 指定 `aapt2` 路径
+   ```bash
+     # 指定 aapt2 路径并忽略警告
+     echo 'android.aapt2FromMavenOverride=/data/data/com.termux/files/usr/bin/aapt2' >> ~/.gradle/gradle.properties && echo 'android.sync.suppressAgpWarnings=UNSUPPORTED_PROJECT_OPTION_USE' >> ~/.gradle/gradle.properties
+   ```
 
 ## 🤝 贡献
 
