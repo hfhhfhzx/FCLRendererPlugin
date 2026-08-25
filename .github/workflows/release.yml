@@ -62,20 +62,23 @@ jobs:
           echo "APK=$(find ./app/build/outputs/apk/release -name "*.apk")" >> $GITHUB_OUTPUT
           echo "build_duration=$duration_human" >> $GITHUB_OUTPUT
       
-      - name: Prepare Release
-        id: prepare_release
+      - name: Get Version
         run: |
           echo "Version=$(git describe --tags --match v* --abbrev=0)" >> $GITHUB_ENV
           echo "VersionCode=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+      
+      - name: Prepare Release
+        id: prepare_release
+        run: |
           {
             echo
             echo "---"
             echo
-            echo "- **Version:** \`${Version}\`"
-            echo "- **VersionCode:** \`${VersionCode}\`"
+            echo "- **Version:** \`${{ env.Version }}\`"
+            echo "- **VersionCode:** \`${{ env.VersionCode }}\`"
             echo "- **Build time:** \`${{ steps.build.outputs.build_duration }}\`"
           } > custom-header.md
-          echo "isPre=$(echo "$Version" | grep -qiE "alpha|beta|snapshot|pre|rc" && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "isPre=$(echo "${{ env.Version }}" | grep -qiE "alpha|beta|snapshot|pre|rc" && echo true || echo false)" >> $GITHUB_ENV
       
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
@@ -85,7 +88,7 @@ jobs:
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
           files: ${{ steps.build.outputs.APK }}
-          prerelease: ${{ steps.prepare_release.outputs.isPre }}
+          prerelease: ${{ env.isPre }}
           
       - name: Update Release with Custom Header
         env:
@@ -98,4 +101,4 @@ jobs:
             cat custom-header.md
           } > full-release-note.md
           
-          gh release edit ${{ env.Version }} --body-file full-release-note.md
+          gh release edit ${{ env.Version }} -F full-release-note.md
