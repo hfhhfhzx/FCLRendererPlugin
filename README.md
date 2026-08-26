@@ -66,43 +66,43 @@ FCLRendererPlugin 正是这样一个插件项目模板，允许你快速生成�
       ```
 - 安装 `Android SDK` 和 `Android NDK`
    - 创建 `android` 目录
-   ```bash
+     ```bash
      mkdir -p android && cd android
-   ```
+     ```
    - 下载文件
-   ```bash
+     ```bash
      wget https://github.com/HomuHomu833/android-ndk-custom/releases/download/r30/android-ndk-r30-beta2-aarch64-linux-android.tar.xz
      wget https://github.com/HomuHomu833/android-sdk-custom/releases/download/37.0.0/android-sdk-aarch64-linux-android.tar.xz
-   ```
+     ```
    感谢 [HomuHomu833](https://github.com/HomuHomu833) 的项目
    
    - 解压
-   ```bash
+     ```bash
      for f in android-*.tar.xz ; do tar -xf "$f" ; done && rm -rf android-*.tar.xz
-   ```
+     ```
    
    - 将下载的 cmdline-tools 解压内容嵌套进 latest 子目录
-   ```bash
+     ```bash
      cd android-sdk/cmdline-tools && mkdir latest && cd latest && mv ../* . 2>/dev/null && cd $HOME
-   ```
+     ```
    
    - 配置
-   ```bash
+     ```bash
      echo 'export ANDROID_HOME=$HOME/android' >> ~/.bashrc && echo 'export PATH=$ANDROID_HOME/android-sdk/cmdline-tools/latest/bin:$PATH' >> ~/.bashrc && echo 'export ANDROID_NDK_HOME=$ANDROID_HOME/android-ndk-r30-beta2' >> ~/.bashrc && echo 'export ANDROID_SDK_HOME=$ANDROID_HOME/android-sdk' >> ~/.bashrc
-   ```
+     ```
    - 重启 Termux
    
    - 接受 Android SDK 的许可
-   ```bash
+     ```bash
      yes | sdkmanager --licenses
-   ```
+     ```
 
 - 按照上一个篇章的步骤进行操作
 
 - 解决 `aapt2` 问题 (只有当你遇到该问题时才这样做)
-   ```bash
+     ```bash
      echo 'android.aapt2FromMavenOverride=/data/data/com.termux/files/usr/bin/aapt2' >> ~/.gradle/gradle.properties && echo 'android.sync.suppressAgpWarnings=UNSUPPORTED_PROJECT_OPTION_USE' >> ~/.gradle/gradle.properties
-   ```
+     ```
 
 ## 🤝 贡献
 
