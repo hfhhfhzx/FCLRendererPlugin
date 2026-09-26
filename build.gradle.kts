@@ -15,14 +15,10 @@ extra["gitHashLong"] = runGitCommand("rev-parse", "HEAD") ?: "unknown"
 extra["gitBranch"] = runGitCommand("rev-parse", "--abbrev-ref", "HEAD") ?: "unknown"
 
 fun runGitCommand(vararg args: String): String? = runCatching {
-    ProcessBuilder(listOf("git") + args)
-        .directory(projectDir)
-        .redirectErrorStream(true)
-        .start()
-        .let { process ->
-            val output = process.inputStream.bufferedReader().readText().trim()
-            if (process.waitFor() == 0 && output.isNotBlank()) output else null
-        }
+    providers.exec {
+        commandLine(listOf("git") + args)
+        workingDir(projectDir)
+    }.standardOutput.asText.get().trim().ifBlank { null }
 }.getOrNull()
 
 defaultTasks("assembleRelease")
