@@ -160,3 +160,7 @@ kotlin {
 base {
     archivesName = "${appName}-v${gitTag}-${gitCommitCount}-${gitHash}"
 }
+
+dependencies {
+    implementation(libs.data.files.provider)
+}

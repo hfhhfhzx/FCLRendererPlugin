@@ -8,6 +8,7 @@ espressoCore = "3.7.0"
 appcompat = "1.8.0"
 material = "1.14.0"
 miuix = "0.9.4"
+dataFilesProvider = "v1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -16,6 +17,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+data-files-provider = { group = "com.github.L-JINBIN", name = "MTDataFilesProvider", version.ref = "dataFilesProvider" }
 
 # miuix
 miuix-core = { group = "top.yukonga.miuix.kmp", name = "miuix-core-android", version.ref = "miuix" }
